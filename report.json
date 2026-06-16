@@ -1,0 +1,18 @@
+{
+    "metrics": {
+        "total_duration_seconds": 1.21,
+        "total_events": 20000,
+        "succeeded_events": 20000,
+        "failed_events": 0,
+        "total_requests": 200,
+        "throughput_events_per_sec": 16467.27,
+        "latency_ms": {
+            "min": 24.77,
+            "max": 212.3,
+            "avg": 59.21,
+            "p95": 157.91,
+            "p99": 199.98
+        },
+        "duplicate_rate_percent": 30.0
+    }
+}
