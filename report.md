@@ -230,7 +230,7 @@ Bagian ini memaparkan alur kerja sistem log aggregator secara kronologis beserta
 
 Berikut adalah visualisasi alur kerja sistem terdistribusi log aggregator Anda:
 
-![Visualisasi Alur Kerja Sistem](file:///D:/sister-uas/system_flow.png)
+![Visualisasi Alur Kerja Sistem](system_flow.png)
 
 ---
 

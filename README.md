@@ -21,15 +21,15 @@ graph TD
 ```
 
 > [!NOTE]
-> Visualisasi diagram alur kerja sistem lengkap juga dapat diakses secara langsung pada berkas gambar: **[system_flow.png](file:///D:/sister-uas/system_flow.png)**.
-> ![System Flow Diagram](file:///D:/sister-uas/system_flow.png)
+> Visualisasi diagram alur kerja sistem lengkap juga dapat diakses secara langsung pada berkas gambar: **[system_flow.png](system_flow.png)**.
+> ![System Flow Diagram](system_flow.png)
 
 ### Komponen Utama:
-1. **[Publisher](file:///D:/sister-uas/publisher/publisher.py)**: Generator log telemetry yang mensimulasikan transmisi data dengan model *at-least-once delivery* (mengirimkan data normal beserta duplikasi minimum 30% untuk menguji sistem deduplikasi).
-2. **[Aggregator API](file:///D:/sister-uas/aggregator/app/api/endpoints.py)**: Menyediakan REST API endpoint berbasis FastAPI untuk menerima log secara single maupun batch, memvalidasi skema data, meningkatkan metrik log masuk, dan memasukkannya ke dalam antrean broker.
-3. **[Redis Broker](file:///D:/sister-uas/docker-compose.yml)**: Berfungsi sebagai message broker perantara untuk meredam lonjakan trafik log (load leveling) dan mendistribusikan log kepada worker.
-4. **[Consumer Worker](file:///D:/sister-uas/aggregator/app/worker/consumer.py)**: Layanan latar belakang (bisa diskalakan banyak instance) yang menarik data dari Redis antrean secara FIFO dan memasukkannya ke database secara transaksional.
-5. **[PostgreSQL Database](file:///D:/sister-uas/aggregator/app/core/database.py)**: Penyimpanan persisten dengan constraint unik `(topic, event_id)` yang mengontrol konkurensi data menggunakan mekanisme Upsert atomik untuk mencegah race condition.
+1. **[Publisher](publisher/publisher.py)**: Generator log telemetry yang mensimulasikan transmisi data dengan model *at-least-once delivery* (mengirimkan data normal beserta duplikasi minimum 30% untuk menguji sistem deduplikasi).
+2. **[Aggregator API](aggregator/app/api/endpoints.py)**: Menyediakan REST API endpoint berbasis FastAPI untuk menerima log secara single maupun batch, memvalidasi skema data, meningkatkan metrik log masuk, dan memasukkannya ke dalam antrean broker.
+3. **[Redis Broker](docker-compose.yml)**: Berfungsi sebagai message broker perantara untuk meredam lonjakan trafik log (load leveling) dan mendistribusikan log kepada worker.
+4. **[Consumer Worker](aggregator/app/worker/consumer.py)**: Layanan latar belakang (bisa diskalakan banyak instance) yang menarik data dari Redis antrean secara FIFO dan memasukkannya ke database secara transaksional.
+5. **[PostgreSQL Database](aggregator/app/core/database.py)**: Penyimpanan persisten dengan constraint unik `(topic, event_id)` yang mengontrol konkurensi data menggunakan mekanisme Upsert atomik untuk mencegah race condition.
 
 ---
 
@@ -150,34 +150,34 @@ Sistem ini dilengkapi dengan 17 skenario pengujian komprehensif menggunakan `pyt
 
 Layanan simulator `publisher` dikonfigurasi untuk merekam data transaksi secara real-time dan mengekspor hasilnya langsung ke folder lokal host Anda (melalui volume mount kontainer) saat simulasi selesai dijalankan:
 
-* **[report.json](file:///D:/sister-uas/report.json)**: Berisi ringkasan metrik akhir dari seluruh durasi simulasi pengujian (total throughput, requests, rates, latency min/max/avg/p95/p99).
-* **[realtime-report.json](file:///D:/sister-uas/realtime-report.json)**: Berisi jejak log realtime JSON-Lines per request yang menunjukkan aliran timestamp, metode HTTP, status kode respons, dan waktu latensi tiap event log.
+* **[report.json](report.json)**: Berisi ringkasan metrik akhir dari seluruh durasi simulasi pengujian (total throughput, requests, rates, latency min/max/avg/p95/p99).
+* **[realtime-report.json](realtime-report.json)**: Berisi jejak log realtime JSON-Lines per request yang menunjukkan aliran timestamp, metode HTTP, status kode respons, dan waktu latensi tiap event log.
 
 Berkas laporan ini secara otomatis tergenerasi di root folder direktori kerja Anda setiap kali kontainer `publisher` menyelesaikan pengujian beban 20.000 event log.
 
 ---
 
 ## 6. Struktur Berkas Repositori
-* **[docker-compose.yml](file:///D:/sister-uas/docker-compose.yml)**: Orkestrasi seluruh arsitektur microservices terdistribusi.
-* **[aggregator/](file:///D:/sister-uas/aggregator)**: Direktori kode program log aggregator.
-  * **[Dockerfile](file:///D:/sister-uas/aggregator/Dockerfile)**: Docker build spec untuk aggregator.
-  * **[app/](file:///D:/sister-uas/aggregator/app)**: Source code aplikasi aggregator terstruktur.
-    * **[api/endpoints.py](file:///D:/sister-uas/aggregator/app/api/endpoints.py)**: Controller endpoints REST API (FastAPI).
-    * **[core/database.py](file:///D:/sister-uas/aggregator/app/core/database.py)**: Inisialisasi tabel, connection pool database, dan query SQL.
-    * **[core/config.py](file:///D:/sister-uas/aggregator/app/core/config.py)**: Variabel konfigurasi terpusat.
-    * **[worker/consumer.py](file:///D:/sister-uas/aggregator/app/worker/consumer.py)**: Logika background consumer antrean Redis.
-* **[publisher/](file:///D:/sister-uas/publisher)**: Layanan simulator beban log.
-  * **[publisher.py](file:///D:/sister-uas/publisher/publisher.py)**: Simulator log dengan multi-concurrency generator.
-  * **[Dockerfile](file:///D:/sister-uas/publisher/Dockerfile)**: Docker build spec untuk simulator.
-* **[tests/](file:///D:/sister-uas/tests)**: Skenario integration & unit testing.
-  * **[test_1_health.py](file:///D:/sister-uas/tests/test_1_health.py)**: Pengujian endpoint healthcheck (Liveness/Readiness).
-  * **[test_2_schema.py](file:///D:/sister-uas/tests/test_2_schema.py)**: Pengujian validasi skema payload log (Pydantic).
-  * **[test_3_publish.py](file:///D:/sister-uas/tests/test_3_publish.py)**: Pengujian penerimaan & pemrosesan event (Tunggal & Batch).
-  * **[test_4_deduplication.py](file:///D:/sister-uas/tests/test_4_deduplication.py)**: Pengujian ketahanan deduplikasi & Idempotent Consumer.
-  * **[test_5_query.py](file:///D:/sister-uas/tests/test_5_query.py)**: Pengujian kueri pencarian & penyaringan log berdasarkan topik.
-  * **[test_6_concurrency.py](file:///D:/sister-uas/tests/test_6_concurrency.py)**: Pengujian perlombaan kondisi konkuren (Race Conditions).
-  * **[test_7_stress.py](file:///D:/sister-uas/tests/test_7_stress.py)**: Pengujian beban stres & analisis latensi ingestion.
-  * **[run_tests.py](file:///D:/sister-uas/tests/run_tests.py)**: Otomatisasi pemicu testing.
-* **[report.md](file:///D:/sister-uas/report.md)**: Dokumen Laporan Teori UAS (Menjawab Soal T1-T10 dengan Sitasi APA 7th).
-* **[report.pdf](file:///D:/sister-uas/report.pdf)**: Dokumen Laporan Teori UAS versi PDF resmi.
-* **[system_flow.png](file:///D:/sister-uas/system_flow.png)**: Visualisasi diagram alur sistem terdistribusi.
+* **[docker-compose.yml](docker-compose.yml)**: Orkestrasi seluruh arsitektur microservices terdistribusi.
+* **[aggregator/](aggregator)**: Direktori kode program log aggregator.
+  * **[Dockerfile](aggregator/Dockerfile)**: Docker build spec untuk aggregator.
+  * **[app/](aggregator/app)**: Source code aplikasi aggregator terstruktur.
+    * **[api/endpoints.py](aggregator/app/api/endpoints.py)**: Controller endpoints REST API (FastAPI).
+    * **[core/database.py](aggregator/app/core/database.py)**: Inisialisasi tabel, connection pool database, dan query SQL.
+    * **[core/config.py](aggregator/app/core/config.py)**: Variabel konfigurasi terpusat.
+    * **[worker/consumer.py](aggregator/app/worker/consumer.py)**: Logika background consumer antrean Redis.
+* **[publisher/](publisher)**: Layanan simulator beban log.
+  * **[publisher.py](publisher/publisher.py)**: Simulator log dengan multi-concurrency generator.
+  * **[Dockerfile](publisher/Dockerfile)**: Docker build spec untuk simulator.
+* **[tests/](tests)**: Skenario integration & unit testing.
+  * **[test_1_health.py](tests/test_1_health.py)**: Pengujian endpoint healthcheck (Liveness/Readiness).
+  * **[test_2_schema.py](tests/test_2_schema.py)**: Pengujian validasi skema payload log (Pydantic).
+  * **[test_3_publish.py](tests/test_3_publish.py)**: Pengujian penerimaan & pemrosesan event (Tunggal & Batch).
+  * **[test_4_deduplication.py](tests/test_4_deduplication.py)**: Pengujian ketahanan deduplikasi & Idempotent Consumer.
+  * **[test_5_query.py](tests/test_5_query.py)**: Pengujian kueri pencarian & penyaringan log berdasarkan topik.
+  * **[test_6_concurrency.py](tests/test_6_concurrency.py)**: Pengujian perlombaan kondisi konkuren (Race Conditions).
+  * **[test_7_stress.py](tests/test_7_stress.py)**: Pengujian beban stres & analisis latensi ingestion.
+  * **[run_tests.py](tests/run_tests.py)**: Otomatisasi pemicu testing.
+* **[report.md](report.md)**: Dokumen Laporan Teori UAS (Menjawab Soal T1-T10 dengan Sitasi APA 7th).
+* **[report.pdf](report.pdf)**: Dokumen Laporan Teori UAS versi PDF resmi.
+* **[system_flow.png](system_flow.png)**: Visualisasi diagram alur sistem terdistribusi.
