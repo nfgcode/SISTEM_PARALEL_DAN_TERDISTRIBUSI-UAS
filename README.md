@@ -1,5 +1,10 @@
 # UAS Sistem Paralel dan Terdistribusi
 **Tema**: Pub-Sub Log Aggregator Terdistribusi dengan Idempotent Consumer, Deduplication, dan Transaksi/Kontrol Konkurensi
+# VIDEO DEMO
+**LINK YOUTUBE**: https://youtu.be/m083NtSBjaw
+
+* **[report.md](report.md)**: Dokumen Laporan Teori UAS (Menjawab Soal T1-T10 dengan Sitasi APA 7th).
+* **[report.pdf](report.pdf)**: Dokumen Laporan Teori UAS versi PDF resmi.
 
 ## 1. Arsitektur Sistem
 

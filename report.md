@@ -1,6 +1,5 @@
 # Laporan Teori Ujian Akhir Semester (UAS) - Sistem Paralel dan Terdistribusi
 **Tema**: Pub-Sub Log Aggregator Terdistribusi dengan Idempotent Consumer, Deduplication, dan Transaksi/Kontrol Konkurensi
-
 ---
 
 ## Identitas Mahasiswa
