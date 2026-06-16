@@ -181,5 +181,3 @@ Berkas laporan ini secara otomatis tergenerasi di root folder direktori kerja An
 * **[report.md](file:///D:/sister-uas/report.md)**: Dokumen Laporan Teori UAS (Menjawab Soal T1-T10 dengan Sitasi APA 7th).
 * **[report.pdf](file:///D:/sister-uas/report.pdf)**: Dokumen Laporan Teori UAS versi PDF resmi.
 * **[system_flow.png](file:///D:/sister-uas/system_flow.png)**: Visualisasi diagram alur sistem terdistribusi.
-* **[video_script.md](file:///D:/sister-uas/video_script.md)**: Naskah/Panduan presentasi video demo uas.
-* **[references.md](file:///D:/sister-uas/references.md)**: Sumber data referensi jurnal ilmiah.
