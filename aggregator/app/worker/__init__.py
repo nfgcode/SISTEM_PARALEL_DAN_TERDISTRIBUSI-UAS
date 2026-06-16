@@ -1,0 +1,1 @@
+# Background consumer initialization

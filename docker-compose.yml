@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  aggregator-api:
+    build:
+      context: ./aggregator
+      dockerfile: Dockerfile
+    image: uts-aggregator-api:latest
+    container_name: aggregator-api
+    command: ["uvicorn", "aggregator.app.api.endpoints:app", "--host", "0.0.0.0", "--port", "8080"]
+    depends_on:
+      storage:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://user:pass@storage:5432/db
+      - BROKER_URL=redis://broker:6379/0
+      - TRANSACTION_ISOLATION=read_committed
+    ports:
+      - "8080:8080"
+    networks:
+      - internal-net
+
+  aggregator-consumer:
+    build:
+      context: ./aggregator
+      dockerfile: Dockerfile
+    image: uts-aggregator-consumer:latest
+    command: ["python", "-m", "aggregator.app.worker.consumer"]
+    depends_on:
+      storage:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://user:pass@storage:5432/db
+      - BROKER_URL=redis://broker:6379/0
+      - TRANSACTION_ISOLATION=read_committed
+      - WORKER_ID=consumer-worker
+    networks:
+      - internal-net
+
+  publisher:
+    build:
+      context: ./publisher
+      dockerfile: Dockerfile
+    image: uts-publisher:latest
+    container_name: publisher
+    depends_on:
+      - aggregator-api
+    environment:
+      - TARGET_URL=http://aggregator-api:8080/publish
+      - READINESS_URL=http://aggregator-api:8080/health/readiness
+      - TOTAL_EVENTS=20000
+      - DUPLICATE_RATE=0.30
+      - BATCH_SIZE=100
+      - CONCURRENCY=10
+    volumes:
+      - ./:/app/output
+    networks:
+      - internal-net
+
+  broker:
+    image: redis:7-alpine
+    container_name: broker
+    ports: [] # Keep internal only
+    volumes:
+      - broker_data:/data
+    networks:
+      - internal-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  storage:
+    image: postgres:16-alpine
+    container_name: storage
+    ports: [] # Keep internal only
+    environment:
+      - POSTGRES_DB=db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - internal-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pg_data:
+  broker_data:
+  aggregator_data: # Declared but not needed as we use postgres
+
+networks:
+  internal-net:
+    driver: bridge
